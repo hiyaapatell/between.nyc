@@ -29,7 +29,7 @@ const discoveries=[
 const from=document.getElementById("from"),to=document.getElementById("to"),msg=document.getElementById("message");
 const mapFrom=document.getElementById("mapFrom"),mapTo=document.getElementById("mapTo");places.forEach((p,i)=>{from.add(new Option(p[0],i));to.add(new Option(p[0],i));mapFrom.add(new Option(p[0],i));mapTo.add(new Option(p[0],i))});to.value="1";mapTo.value="1";from.onchange=()=>mapFrom.value=from.value;to.onchange=()=>mapTo.value=to.value;mapFrom.onchange=()=>from.value=mapFrom.value;mapTo.onchange=()=>to.value=mapTo.value;
 
-const map=new maplibregl.Map({container:"map",style:"https://tiles.openfreemap.org/styles/liberty",center:[-73.982,40.755],zoom:15.4,pitch:63,bearing:-24,antialias:true,scrollZoom:false});
+const map=new maplibregl.Map({container:"map",style:"https://tiles.openfreemap.org/styles/liberty",center:[-73.982,40.755],zoom:15.4,pitch:63,bearing:-24,antialias:true,scrollZoom:true});
 map.addControl(new maplibregl.NavigationControl({visualizePitch:true}),"bottom-right");
 let routeData=null,nearby=[],current=0,markers=[];
 const blank={type:"FeatureCollection",features:[]};
