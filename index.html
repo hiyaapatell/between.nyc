@@ -86,11 +86,15 @@ landmarkData.push(
 const from=document.getElementById("from"),to=document.getElementById("to"),msg=document.getElementById("message");
 const mapFrom=document.getElementById("mapFrom"),mapTo=document.getElementById("mapTo");places.forEach((p,i)=>{from.add(new Option(p[0],i));to.add(new Option(p[0],i));mapFrom.add(new Option(p[0],i));mapTo.add(new Option(p[0],i))});to.value="1";mapTo.value="1";from.onchange=()=>mapFrom.value=from.value;to.onchange=()=>mapTo.value=to.value;mapFrom.onchange=()=>from.value=mapFrom.value;mapTo.onchange=()=>to.value=mapTo.value;
 
-const map=new maplibregl.Map({container:"map",style:"https://tiles.openfreemap.org/styles/liberty",center:[-73.982,40.755],zoom:15.4,pitch:63,bearing:-24,antialias:true,scrollZoom:true});
+const map=new maplibregl.Map({container:"map",style:"https://tiles.openfreemap.org/styles/liberty",center:[-73.982,40.755],zoom:15.4,pitch:63,bearing:-24,antialias:true,scrollZoom:{around:"center"},fadeDuration:180,maxPitch:75});
+// Smooth wheel and trackpad input without affecting page scrolling outside the map.
+map.scrollZoom.setWheelZoomRate(1/900);
+map.scrollZoom.setZoomRate(1/180);
+map.touchZoomRotate.enable();
 map.addControl(new maplibregl.NavigationControl({visualizePitch:true}),"bottom-right");
 // Make the existing compass/tilt control return to the original wide 3D overview.
 const compassButton=document.querySelector(".maplibregl-ctrl-compass");
-if(compassButton){compassButton.title="Return to NYC overview";compassButton.setAttribute("aria-label","Return to NYC overview");compassButton.addEventListener("click",event=>{event.preventDefault();event.stopImmediatePropagation();map.flyTo({center:[-73.982,40.755],zoom:13.3,pitch:60,bearing:-24,duration:1300,essential:true});},true)}
+if(compassButton){compassButton.title="Return to NYC overview";compassButton.setAttribute("aria-label","Return to NYC overview");compassButton.addEventListener("click",event=>{event.preventDefault();event.stopImmediatePropagation();map.flyTo({center:[-73.982,40.755],zoom:13.3,pitch:60,bearing:-24,duration:1700,essential:true,curve:1.15});},true)}
 let routeData=null,nearby=[],current=0,markers=[];
 const blank={type:"FeatureCollection",features:[]};
 map.on("load",()=>{
@@ -124,7 +128,7 @@ function show(d){
  document.getElementById("storyBody").textContent=d.body;
  document.getElementById("panel").classList.add("open");
  loadPhoto(d);
- map.flyTo({center:[d.lng,d.lat],zoom:16.3,pitch:60,bearing:-20});
+ map.flyTo({center:[d.lng,d.lat],zoom:16.3,pitch:60,bearing:-20,duration:1500,essential:true,curve:1.1});
 }
 function addLandmarkPins(){
  landmarkData.forEach(d=>{
@@ -151,7 +155,7 @@ function renderRoute(coords){
   const source=map.getSource("walking-route");
   if(source)source.setData({type:"FeatureCollection",features:[{type:"Feature",geometry:{type:"LineString",coordinates:coords},properties:{}}]});
   const bounds=new maplibregl.LngLatBounds();coords.forEach(p=>bounds.extend(p));
-  map.resize();map.fitBounds(bounds,{padding:90,maxZoom:16.5,pitch:60,bearing:-24,duration:1200});
+  map.resize();map.fitBounds(bounds,{padding:90,maxZoom:16.5,pitch:60,bearing:-24,duration:1700});
   decorate(coords);
 }
 async function explore(){
