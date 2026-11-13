@@ -109,10 +109,31 @@ if(compassButton){compassButton.title="Return to NYC overview";compassButton.set
 let routeData=null,nearby=[],current=0,markers=[];
 const blank={type:"FeatureCollection",features:[]};
 map.on("load",()=>{
+  // Use OpenFreeMap's actual building footprints and tagged heights.
+  // Neutral stone/glass colors and opaque surfaces avoid the pastel translucent blocks.
   const style=map.getStyle();
-  const sourceName=Object.keys(style.sources).find(k=>style.sources[k].type==="vector");
-  if(sourceName){
-    try{map.addLayer({id:"between-3d-buildings",type:"fill-extrusion",source:sourceName,"source-layer":"building",minzoom:13,paint:{"fill-extrusion-color":["interpolate",["linear"],["coalesce",["get","render_height"],["get","height"],12],0,"#ffc1a0",25,"#f3a987",80,"#ff7968",200,"#edb5d6"],"fill-extrusion-height":["coalesce",["to-number",["get","render_height"]],["to-number",["get","height"]],18],"fill-extrusion-base":["coalesce",["to-number",["get","render_min_height"]],0],"fill-extrusion-opacity":0.88}})}catch(e){console.warn("3D building layer not available",e)}
+  const vectorEntry=Object.entries(style.sources).find(([name,s])=>s.type==="vector");
+  if(vectorEntry){
+    const sourceName=vectorEntry[0];
+    // Avoid overlapping a second set of extrusions if the basemap already supplies one.
+    for(const layer of [...(map.getStyle().layers||[])].reverse()){
+      if(layer.type==="fill-extrusion")map.setLayoutProperty(layer.id,"visibility","none");
+    }
+    const height=["coalesce",["to-number",["get","render_height"]],["to-number",["get","height"]],["*",["to-number",["get","building:levels"]],3.2],12];
+    const base=["coalesce",["to-number",["get","render_min_height"]],["to-number",["get","min_height"]],0];
+    try{
+      map.addLayer({
+        id:"between-3d-buildings",type:"fill-extrusion",source:sourceName,"source-layer":"building",minzoom:13,
+        paint:{
+          "fill-extrusion-color":["interpolate",["linear"],height,
+            0,"#d8cbbd",20,"#d4c6b7",50,"#c7c5c1",100,"#b8bec2",220,"#a9b8c3"],
+          "fill-extrusion-height":height,
+          "fill-extrusion-base":base,
+          "fill-extrusion-opacity":1,
+          "fill-extrusion-vertical-gradient":true
+        }
+      });
+    }catch(e){console.warn("Building geometry not available",e)}
   }
   map.addSource("walking-route",{type:"geojson",data:blank});
   map.addLayer({id:"route-glow",type:"line",source:"walking-route",paint:{"line-color":"#ffb4a2","line-width":13,"line-opacity":0.6}});
