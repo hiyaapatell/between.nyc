@@ -45,6 +45,9 @@ const mapFrom=document.getElementById("mapFrom"),mapTo=document.getElementById("
 
 const map=new maplibregl.Map({container:"map",style:"https://tiles.openfreemap.org/styles/liberty",center:[-73.982,40.755],zoom:15.4,pitch:63,bearing:-24,antialias:true,scrollZoom:true});
 map.addControl(new maplibregl.NavigationControl({visualizePitch:true}),"bottom-right");
+// Make the existing compass/tilt control return to the original wide 3D overview.
+const compassButton=document.querySelector(".maplibregl-ctrl-compass");
+if(compassButton){compassButton.title="Return to NYC overview";compassButton.setAttribute("aria-label","Return to NYC overview");compassButton.addEventListener("click",event=>{event.preventDefault();event.stopImmediatePropagation();map.flyTo({center:[-73.982,40.755],zoom:13.3,pitch:60,bearing:-24,duration:1300,essential:true});},true)}
 let routeData=null,nearby=[],current=0,markers=[];
 const blank={type:"FeatureCollection",features:[]};
 map.on("load",()=>{
